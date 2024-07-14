@@ -1,0 +1,458 @@
+PluginInfo = {
+	-- Use a tilde (~) to seperate the name into a folder
+    Name = "Status Map",
+	-- Use semantic versioning
+    Version = "0.2.0",
+	-- Use a GUID for the Id (Note: Avoid changing the Id for a plugin as the Id is used as the unique identifier)
+    Id = "5e5d7ed9-713f-4473-a1ec-37d0f2f73515",
+	-- The square brackets allow for a multi-line string
+    Description = [[Allows an SVG map to be drawn and items placed on it to view status information graphically]],
+    Author = "Kyle McNicoll",
+    ShowDebug = true
+}
+
+------------------------------- Global Variables ------------------------------
+COLORS = { 
+	["OK"] = "#008B00",
+	[0] = "#008B00",
+	["COMPROMISED"] = "orange",
+	[1] = "#FFA500",
+	["FAULT"] = "red",
+	[2] = "#FF0000",
+	["NOT_PRESENT"] = "gray",
+	[3] = "#7C7C7C",
+	["MISSING"] = "darkred",
+	[4] = "#C00000",
+	["INITIALIZING"] = "blue",
+	[5] = "#0000FF",
+	["GREEN"] = "#00ff00",
+	["RED"] = "#ff0000",
+	["ORANGE"] = "#ffa500",
+	["GRAY"] = "#7c7c7c",
+	["DARK_GREEN"] = "#007C00",
+}
+
+STATUS_VALUES = {
+	["OK"] = 0,
+	["COMPROMISED"] = 1,
+	["FAULT"] = 2,
+	["NOT_PRESENT"] = 3,
+	["MISSING"] = 4,
+	["INITIALIZING"] = 5,
+}
+
+--------------------------------- Properties ----------------------------------
+function GetProperties()
+    props = {
+		{
+			Name = "Input Quantity",
+			Type = "integer",
+			Min = 1,
+			Max = 32,
+			Value = 1
+		},
+		{
+			Name = "Refresh Rate (Hz)",
+			Type = "integer",
+			Min = 1,
+			Max = 30,
+			Value = 30
+		}
+    }
+
+    return props
+end
+
+--Modify visibility based on other properties
+--[[
+    Example: 
+    if props["propertyName"].Value == "DHCP" then
+        props["someStaticIPRelatedProperty"].IsHidden = true
+    else
+        props["someStaticIPRelatedProperty"].IsHidden = false
+]]--
+function RectifyProperties(props)
+    return props
+end
+
+------------------------------ Plugin Block Name ------------------------------
+function GetPrettyName(props)
+    return "Status Map"
+end
+
+---------------------------------- Controls -----------------------------------
+function GetControls(props)
+    local inputCount = props["Input Quantity"].Value
+
+    local ctls = {
+        {
+            Name = "Output Map",
+            Count = 1,
+            ControlType = "Indicator",
+            IndicatorType = "LED",
+            UserPin = false
+        },
+        {
+            Name = "Input Map",
+            Count = 1,
+            ControlType = "Text",
+            UserPin = true,
+            PinStyle = "Input"
+        },
+        {
+            Name = "Status",
+            Count = inputCount,
+            ControlType = "Indicator",
+            IndicatorType = "Status",
+            UserPin = false,
+            PinStyle = "Input"
+        },
+        {
+            Name = "X Position",
+            Count = inputCount,
+            ControlType = "Text",
+            UserPin = true,
+            PinStyle = "Input"
+        },
+        {
+            Name = "Y Position",
+            Count = inputCount,
+            ControlType = "Text",
+            UserPin = true,
+            PinStyle = "Input"
+        },
+        {
+            Name = "Name",
+            Count = inputCount,
+            ControlType = "Text",
+            UserPin = true,
+            PinStyle = "Input"
+        },--[[
+        {
+            Name = "code",
+            ControlType = "Text",
+            PinStyle = "Input",
+            UserPin = true,
+            Count = 1
+        }]]
+    }
+
+    return ctls
+end
+
+------------------------------- Control Layout --------------------------------
+function GetControlLayout(props)
+    local currentPage = props["page_index"].Value
+    local inputCount = props["Input Quantity"].Value
+    layout = { }
+
+    --[[layout["code"] = 
+    {
+        PrettyName = "Code",
+        Style = "None"
+    }]]--
+
+    if (currentPage == 1) then
+        layout["Output Map"] =
+        {
+            PrettyName = "Output Map",
+            Position = { 10 , 10 },
+            Size = { 300 , 300 },
+            Color = { 255, 255, 255 },
+            Margin = 0,
+            Radius = 0,
+            Style = "Button",
+            TextFontSize = 10,
+            WordWrap = true,
+            IsBold = false,
+            IsReadOnly = true
+        }
+
+    else
+
+        layout["Input Map"] =
+        {
+            PrettyName = "Input Map",
+            Position = { 10 , 10 },
+            Size = { 300 , 150 },
+            Color = { 255, 255, 255 },
+            Margin = 0,
+            Radius = 0,
+            Style = "Text",
+            TextFontSize = 10,
+            WordWrap = true,
+            IsBold = false,
+            IsReadOnly = false
+        }
+
+        if (inputCount == 1) then
+            layout["Status"] =
+            {
+                PrettyName = "Status",
+                Position = {75 , 170 },
+                Size = { 150 , 60 },
+                Margin = 0,
+                Radius = 0,
+                Style = "Text",
+                TextFontSize = 10,
+                WordWrap = true,
+                IsBold = false,
+                IsReadOnly = true
+            }
+            layout["X Position"] =
+            {
+                PrettyName = "X Position",
+                Position = { 235 , 170 },
+                Size = { 75 , 16 },
+                Color = { 255, 255, 255 },
+                Margin = 0,
+                Radius = 0,
+                Style = "Text",
+                TextFontSize = 10,
+                WordWrap = true,
+                IsBold = false,
+                IsReadOnly = false
+            }
+            layout["Y Position"] =
+            {
+                PrettyName = "Y Position",
+                Position = { 235 , 190 },
+                Size = { 75 , 16 },
+                Color = { 255, 255, 255 },
+                Margin = 0,
+                Radius = 0,
+                Style = "Text",
+                TextFontSize = 10,
+                WordWrap = true,
+                IsBold = false,
+                IsReadOnly = false
+            }
+            layout["Name"] =
+            {
+                PrettyName = "Name",
+                Position = { 235 , 210 },
+                Size = { 75 , 16 },
+                Color = { 255, 255, 255 },
+                Margin = 0,
+                Radius = 0,
+                Style = "Text",
+                TextFontSize = 10,
+                WordWrap = true,
+                IsBold = false,
+                IsReadOnly = false
+            }
+        else
+            for i = 0, inputCount do
+                layout["Status " .. i] =
+                {
+                    PrettyName = "Status " .. i,
+                    Position = {75 , 100 + (i * 70) },
+                    Size = { 150 , 60 },
+                    Margin = 0,
+                    Radius = 0,
+                    Style = "Text",
+                    TextFontSize = 10,
+                    WordWrap = true,
+                    IsBold = false,
+                    IsReadOnly = true
+                }
+                layout["X Position " .. i] =
+                {
+                    PrettyName = "X Position " .. i,
+                    Position = { 235 , 100 + (i * 70) },
+                    Size = { 75 , 16 },
+                    Color = { 255, 255, 255 },
+                    Margin = 0,
+                    Radius = 0,
+                    Style = "Text",
+                    TextFontSize = 10,
+                    WordWrap = true,
+                    IsBold = false,
+                    IsReadOnly = false
+                }
+                layout["Y Position " .. i] =
+                {
+                    PrettyName = "Y Position " .. i,
+                    Position = { 235 , 120 + (i * 70) },
+                    Size = { 75 , 16 },
+                    Color = { 255, 255, 255 },
+                    Margin = 0,
+                    Radius = 0,
+                    Style = "Text",
+                    TextFontSize = 10,
+                    WordWrap = true,
+                    IsBold = false,
+                    IsReadOnly = false
+                }
+                layout["Name " .. i] =
+                {
+                    PrettyName = "Name " .. i,
+                    Position = { 235 , 140 + (i * 70) },
+                    Size = { 75 , 16 },
+                    Color = { 255, 255, 255 },
+                    Margin = 0,
+                    Radius = 0,
+                    Style = "Text",
+                    TextFontSize = 10,
+                    WordWrap = true,
+                    IsBold = false,
+                    IsReadOnly = false
+                }
+            end
+        end
+    end
+
+    graphics = { }
+
+    return layout, graphics
+end
+
+---------------------------- Other Plugin Functions ---------------------------
+
+function GetPins(props)
+	local pins = { }
+  
+	return pins
+end
+
+function GetPages(props)
+    local pages = {
+        {name = "Map"},
+        {name = "Config"},
+    }
+
+    return pages
+end
+
+function GetComponents(props)
+	local components
+
+	return components
+end
+
+function GetWiring(props)
+	local wiring = { }
+  
+	return wiring
+end
+
+------------------------------ Local Functions --------------------------------
+function HEXtoDEC(hex)
+	hex = string.upper(hex)
+	local b1 = string.byte(string.sub(hex, 1, 1))
+	local b2 = string.byte(string.sub(hex, 2, 2))
+  
+	return( (b1<=57 and b1-48 or b1-55)*16 + (b2<=57 and b2-48 or b2-55) )
+end
+
+function ConvertColor(c)
+	local t = {}
+	t[1] = HEXtoDEC(string.sub(c,2,3))
+	t[2] = HEXtoDEC(string.sub(c,4,5))
+	t[3] = HEXtoDEC(string.sub(c,6,7))
+	return t
+end
+
+function insertBeforeClosingTag(xmlString, tag, stringToInsert)
+    local start = 0
+    local stop = 0
+    
+    start, stop = string.find(xmlString, "</[^>]*" .. tag .. "[^>]*>")
+    if(start == nil) then return xmlString .. stringToInsert end
+    
+    if(start == 1) then
+      return xmlString .. stringToInsert
+    end
+    
+    return string.sub(xmlString, 1, start - 1) .. stringToInsert .. string.sub(xmlString, start, xmlString:len())
+  end
+  
+  function removeTag(xmlString, tag)
+    local start = 0
+    local stop = 0
+    local returnedString = ""
+    
+    start, stop = string.find(xmlString, "<[^>]*" .. tag .. "[^>]*>")
+    if(start == nil) then return xmlString end
+    --print("Start: " .. start .. " - Stop: " .. stop .. " - " .. string.sub(xmlString, start, stop))
+    
+    if(start ~= 1) then
+      returnedString = returnedString .. string.sub(xmlString, 1, start - 1)
+    end  
+    
+    if(stop ~= xmlString:len()) then
+      returnedString = returnedString .. string.sub(xmlString, stop + 1, xmlString:len())
+    end
+    
+    return returnedString
+  end
+  
+  function UpdateMap()
+    local doc = EzSVG.Document(300, 300)
+    
+    if(INPUT_COUNT == 1) then
+      if(tonumber(Controls["X Position"].String) == nil) then Controls["X Position"].String = "0" end
+      if(tonumber(Controls["Y Position"].String) == nil) then Controls["Y Position"].String = "0" end
+      doc:add(EzSVG.Text(Controls["Name"].String, Controls["X Position"].String, Controls["Y Position"].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", stroke = "white", stroke_width = "0.5em", stroke_linejoin = "round"}))
+      doc:add(EzSVG.Text(Controls["Name"].String, Controls["X Position"].String, Controls["Y Position"].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", fill = "black"}))
+      doc:add(EzSVG.Circle(Controls["X Position"].String, Controls["Y Position"].String, 15):setStyle({fill=COLORS[Controls["Status"].Value]}))
+    else
+      for idx = 1, INPUT_COUNT do
+        if(tonumber(Controls["X Position"][idx].String) == nil) then Controls["X Position"][idx].String = "0" end
+        if(tonumber(Controls["Y Position"][idx].String) == nil) then Controls["Y Position"][idx].String = "0" end
+        doc:add(EzSVG.Text(Controls["Name"][idx].String, Controls["X Position"][idx].String, Controls["Y Position"][idx].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", stroke = "white", stroke_width = "0.5em", stroke_linejoin = "round"}))
+        doc:add(EzSVG.Text(Controls["Name"][idx].String, Controls["X Position"][idx].String, Controls["Y Position"][idx].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", fill = "black"}))
+        doc:add(EzSVG.Circle(Controls["X Position"][idx].String, Controls["Y Position"][idx].String, 15):setStyle({fill=COLORS[Controls["Status"][idx].Value]}))
+      end
+    end
+    
+    foreground = doc:toString()
+    foreground = removeTag(foreground, "xml")
+    foreground = removeTag(foreground, "svg")
+    foreground = removeTag(foreground, "/svg")
+  
+    background = Controls["Input Map"].String
+    
+    svg = insertBeforeClosingTag(background, "svg", foreground)
+  
+    Controls["Output Map"].Legend = rapidjson.encode({
+        DrawChrome = false, -- (Don't) Draw the button face and edges
+        IconData = Crypto.Base64Encode(svg),
+      })
+  end
+
+------------------------------- Runtime Logic ---------------------------------
+
+if Controls then
+    
+rapidjson = require("rapidjson")
+EzSVG = require "EzSVG"
+------------------------------------ Objects ----------------------------------
+REFRESH_INTERVAL = 1.0 / Properties["Refresh Rate (Hz)"].Value
+INPUT_COUNT = Properties["Input Quantity"].Value
+
+
+-------------------------------- Initialization -------------------------------
+function Initialize()
+	-- Do initialization stuff here
+    RefreshTimer = Timer.New()
+    RefreshTimer.EventHandler = UpdateMap
+    print("Starting plugin with refresh interval of: " .. REFRESH_INTERVAL)
+    RefreshTimer:Start(REFRESH_INTERVAL)
+end
+
+canInitialize = true
+
+-- Check Properties and other stuff for illegal values
+
+if canInitialize then
+	print("Initializing")
+	Initialize()
+	print("Initialization Complete")
+else
+	print("Not initializing")
+end
+
+-- Nothing should be done after this point
+
+end	--if Controls 
