@@ -134,14 +134,14 @@ function GetControls(props)
             ControlType = "Text",
             UserPin = true,
             PinStyle = "Input"
-        },
+        },--[[
         {
             Name = "code",
             ControlType = "Text",
             PinStyle = "Input",
             UserPin = true,
             Count = 1
-        }
+        }]]
     }
 
     return ctls
@@ -157,11 +157,11 @@ function GetControlLayout(props)
     local inputCount = props["Input Quantity"].Value
     layout = { }
 
-    layout["code"] = 
+    --[[layout["code"] = 
     {
         PrettyName = "Code",
         Style = "None"
-    }
+    }]]
 
     if (currentPage == 1) then
         layout["Rendered Map"] =
