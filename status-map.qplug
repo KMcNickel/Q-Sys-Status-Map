@@ -2,7 +2,7 @@ PluginInfo = {
 	-- Use a tilde (~) to seperate the name into a folder
     Name = "Status Map",
 	-- Use semantic versioning
-    Version = "0.2.0",
+    Version = "0.3.0",
 	-- Use a GUID for the Id (Note: Avoid changing the Id for a plugin as the Id is used as the unique identifier)
     Id = "5e5d7ed9-713f-4473-a1ec-37d0f2f73515",
 	-- The square brackets allow for a multi-line string
@@ -77,7 +77,7 @@ end
 
 ------------------------------ Plugin Block Name ------------------------------
 function GetPrettyName(props)
-    return "Status Map"
+    return "Status Map v" .. PluginInfo.Version
 end
 
 ---------------------------------- Controls -----------------------------------
@@ -86,14 +86,14 @@ function GetControls(props)
 
     local ctls = {
         {
-            Name = "Output Map",
+            Name = "Rendered Map",
             Count = 1,
             ControlType = "Indicator",
             IndicatorType = "LED",
             UserPin = false
         },
         {
-            Name = "Input Map",
+            Name = "Background Map",
             Count = 1,
             ControlType = "Text",
             UserPin = true,
@@ -134,14 +134,14 @@ function GetControls(props)
             ControlType = "Text",
             UserPin = true,
             PinStyle = "Input"
-        },--[[
+        },
         {
             Name = "code",
             ControlType = "Text",
             PinStyle = "Input",
             UserPin = true,
             Count = 1
-        }]]
+        }
     }
 
     return ctls
@@ -149,21 +149,25 @@ end
 
 ------------------------------- Control Layout --------------------------------
 function GetControlLayout(props)
+    BACKGROUND_MAP_Y_POSITION = 0
+    INTERFACE_SCALE_Y_POSITION = 185
+    INPUT_DATA_Y_POSITION = 210
+
     local currentPage = props["page_index"].Value
     local inputCount = props["Input Quantity"].Value
     layout = { }
 
-    --[[layout["code"] = 
+    layout["code"] = 
     {
         PrettyName = "Code",
         Style = "None"
-    }]]--
+    }
 
     if (currentPage == 1) then
-        layout["Output Map"] =
+        layout["Rendered Map"] =
         {
-            PrettyName = "Output Map",
-            Position = { 10 , 10 },
+            PrettyName = "Rendered Map",
+            Position = { 10, 20 },
             Size = { 300 , 300 },
             Color = { 255, 255, 255 },
             Margin = 0,
@@ -175,12 +179,12 @@ function GetControlLayout(props)
             IsReadOnly = true
         }
 
-    else
+    elseif (currentPage == 2) then
 
-        layout["Input Map"] =
+        layout["Background Map"] =
         {
-            PrettyName = "Input Map",
-            Position = { 10 , 10 },
+            PrettyName = "Background Map",
+            Position = { 10 , BACKGROUND_MAP_Y_POSITION + 20 },
             Size = { 300 , 150 },
             Color = { 255, 255, 255 },
             Margin = 0,
@@ -195,8 +199,8 @@ function GetControlLayout(props)
         layout["Interface Scale"] =
         {
             PrettyName = "Interface Scale",
-            Position = { 75 , 170 },
-            Size = { 150 , 16 },
+            Position = { 85 , INTERFACE_SCALE_Y_POSITION },
+            Size = { 75 , 16 },
             Color = { 255, 255, 255 },
             Margin = 0,
             Radius = 0,
@@ -211,8 +215,8 @@ function GetControlLayout(props)
             layout["Status"] =
             {
                 PrettyName = "Status",
-                Position = { 75 , 190 },
-                Size = { 150 , 60 },
+                Position = { 10 , INPUT_DATA_Y_POSITION + 20 },
+                Size = { 150 , 40 },
                 Margin = 0,
                 Radius = 0,
                 Style = "Text",
@@ -224,7 +228,7 @@ function GetControlLayout(props)
             layout["X Position"] =
             {
                 PrettyName = "X Position",
-                Position = { 235 , 190 },
+                Position = { 235 , INPUT_DATA_Y_POSITION + 5 },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -238,7 +242,7 @@ function GetControlLayout(props)
             layout["Y Position"] =
             {
                 PrettyName = "Y Position",
-                Position = { 235 , 210 },
+                Position = { 235 , INPUT_DATA_Y_POSITION + 25 },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -252,7 +256,7 @@ function GetControlLayout(props)
             layout["Name"] =
             {
                 PrettyName = "Name",
-                Position = { 235 , 230 },
+                Position = { 235 , INPUT_DATA_Y_POSITION + 45 },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -268,8 +272,8 @@ function GetControlLayout(props)
                 layout["Status " .. i] =
                 {
                     PrettyName = "Status " .. i,
-                    Position = {75 , 120 + (i * 70) },
-                    Size = { 150 , 60 },
+                    Position = {10 , INPUT_DATA_Y_POSITION + 20 + ((i - 1) * 70) },
+                    Size = { 150 , 40 },
                     Margin = 0,
                     Radius = 0,
                     Style = "Text",
@@ -281,7 +285,7 @@ function GetControlLayout(props)
                 layout["X Position " .. i] =
                 {
                     PrettyName = "X Position " .. i,
-                    Position = { 235 , 120 + (i * 70) },
+                    Position = { 235 , INPUT_DATA_Y_POSITION + 5 + ((i - 1) * 70) },
                     Size = { 75 , 16 },
                     Color = { 255, 255, 255 },
                     Margin = 0,
@@ -295,7 +299,7 @@ function GetControlLayout(props)
                 layout["Y Position " .. i] =
                 {
                     PrettyName = "Y Position " .. i,
-                    Position = { 235 , 140 + (i * 70) },
+                    Position = { 235 , INPUT_DATA_Y_POSITION + 25 + ((i - 1) * 70) },
                     Size = { 75 , 16 },
                     Color = { 255, 255, 255 },
                     Margin = 0,
@@ -309,7 +313,7 @@ function GetControlLayout(props)
                 layout["Name " .. i] =
                 {
                     PrettyName = "Name " .. i,
-                    Position = { 235 , 160 + (i * 70) },
+                    Position = { 235 , INPUT_DATA_Y_POSITION + 45 + ((i - 1) * 70) },
                     Size = { 75 , 16 },
                     Color = { 255, 255, 255 },
                     Margin = 0,
@@ -325,6 +329,155 @@ function GetControlLayout(props)
     end
 
     graphics = { }
+
+    if (currentPage == 1) then
+        table.insert(graphics, {
+            Type = "GroupBox",
+			Position = {0, 0},
+			Size = {320, 330},
+			Text = "Rendered Map",
+			TextSize = 12,
+			HTextAlign = "Left",
+			IsBold = false,
+			StrokeWidth = 1,
+			CornerRadius = 8
+        })
+    elseif (currentPage == 2) then
+        table.insert(graphics, {
+            Type = "GroupBox",
+			Position = {0, BACKGROUND_MAP_Y_POSITION},
+			Size = {320, 180},
+			Text = "Background Map",
+			TextSize = 12,
+			HTextAlign = "Left",
+			IsBold = false,
+			StrokeWidth = 1,
+			CornerRadius = 8
+        })
+        table.insert(graphics, {
+            Type = "Label",
+			Position = {0, INTERFACE_SCALE_Y_POSITION},
+			Size = {80, 16},
+			Text = "Interface Scale",
+			TextSize = 12,
+			HTextAlign = "Right",
+			VTextAlign = "Center",
+			IsBold = false,
+			StrokeWidth = 0,
+			CornerRadius = 0
+        })
+        table.insert(graphics, {
+			Type = "Label",
+			Position = {165, INTERFACE_SCALE_Y_POSITION},
+			Size = {155, 16},
+			Text = "Author: Kyle McNicoll - Version: " .. PluginInfo.Version,
+			TextSize = 10,
+			HTextAlign = "Left",
+			VTextAlign = "Center",
+			IsBold = false,
+			StrokeWidth = 0,
+			CornerRadius = 0
+        })
+        if (inputCount == 1) then
+            table.insert(graphics, {
+                Type = "GroupBox",
+                Position = {0, INPUT_DATA_Y_POSITION},
+                Size = {320, 65},
+                Text = "Input 1",
+                TextSize = 12,
+                HTextAlign = "Left",
+                IsBold = false,
+                StrokeWidth = 1,
+                CornerRadius = 8
+            })
+            table.insert(graphics, {
+                Type = "Label",
+                Position = {165, INPUT_DATA_Y_POSITION + 5},
+                Size = {70, 16},
+                Text = "X Position",
+                TextSize = 12,
+                HTextAlign = "Right",
+                VTextAlign = "Center",
+                IsBold = false,
+                StrokeWidth = 0,
+                CornerRadius = 0
+            })
+            table.insert(graphics, {
+                Type = "Label",
+                Position = {165, INPUT_DATA_Y_POSITION + 25},
+                Size = {70, 16},
+                Text = "Y Position",
+                TextSize = 12,
+                HTextAlign = "Right",
+                VTextAlign = "Center",
+                IsBold = false,
+                StrokeWidth = 0,
+                CornerRadius = 0
+            })
+            table.insert(graphics, {
+                Type = "Label",
+                Position = {165, INPUT_DATA_Y_POSITION + 45},
+                Size = {70, 16},
+                Text = "Name",
+                TextSize = 12,
+                HTextAlign = "Right",
+                VTextAlign = "Center",
+                IsBold = false,
+                StrokeWidth = 0,
+                CornerRadius = 0
+            })
+        else
+            for i = 1, inputCount do
+                table.insert(graphics, {
+                    Type = "GroupBox",
+                    Position = {0, INPUT_DATA_Y_POSITION + ((i - 1) * 70)},
+                    Size = {320, 65},
+                    Text = "Input " .. i,
+                    TextSize = 12,
+                    HTextAlign = "Left",
+                    IsBold = false,
+                    StrokeWidth = 1,
+                    CornerRadius = 8
+                })
+                table.insert(graphics, {
+                    Type = "Label",
+                    Position = {165, INPUT_DATA_Y_POSITION + 5 + ((i - 1) * 70)},
+                    Size = {70, 16},
+                    Text = "X Position",
+                    TextSize = 12,
+                    HTextAlign = "Right",
+                    VTextAlign = "Center",
+                    IsBold = false,
+                    StrokeWidth = 0,
+                    CornerRadius = 0
+                })
+                table.insert(graphics, {
+                    Type = "Label",
+                    Position = {165, INPUT_DATA_Y_POSITION + 25 + ((i - 1) * 70)},
+                    Size = {70, 16},
+                    Text = "Y Position",
+                    TextSize = 12,
+                    HTextAlign = "Right",
+                    VTextAlign = "Center",
+                    IsBold = false,
+                    StrokeWidth = 0,
+                    CornerRadius = 0
+                })
+                table.insert(graphics, {
+                    Type = "Label",
+                    Position = {165, INPUT_DATA_Y_POSITION + 45 + ((i - 1) * 70)},
+                    Size = {70, 16},
+                    Text = "Name",
+                    TextSize = 12,
+                    HTextAlign = "Right",
+                    VTextAlign = "Center",
+                    IsBold = false,
+                    StrokeWidth = 0,
+                    CornerRadius = 0
+                })
+            end
+        end
+    end
 
     return layout, graphics
 end
@@ -436,11 +589,11 @@ function UpdateMap()
     foreground = removeTag(foreground, "svg")
     foreground = removeTag(foreground, "/svg")
   
-    background = Controls["Input Map"].String
+    background = Controls["Background Map"].String
     
     svg = insertBeforeClosingTag(background, "svg", foreground)
   
-    Controls["Output Map"].Legend = rapidjson.encode({
+    Controls["Rendered Map"].Legend = rapidjson.encode({
         DrawChrome = false, -- (Don't) Draw the button face and edges
         IconData = Crypto.Base64Encode(svg),
       })
