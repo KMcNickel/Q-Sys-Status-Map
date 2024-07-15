@@ -100,6 +100,13 @@ function GetControls(props)
             PinStyle = "Input"
         },
         {
+            Name = "Interface Scale",
+            Count = 1,
+            ControlType = "Text",
+            UserPin = true,
+            PinStyle = "Input"
+        },
+        {
             Name = "Status",
             Count = inputCount,
             ControlType = "Indicator",
@@ -185,11 +192,26 @@ function GetControlLayout(props)
             IsReadOnly = false
         }
 
+        layout["Interface Scale"] =
+        {
+            PrettyName = "Interface Scale",
+            Position = { 75 , 170 },
+            Size = { 150 , 16 },
+            Color = { 255, 255, 255 },
+            Margin = 0,
+            Radius = 0,
+            Style = "Text",
+            TextFontSize = 10,
+            WordWrap = true,
+            IsBold = false,
+            IsReadOnly = false
+        }
+
         if (inputCount == 1) then
             layout["Status"] =
             {
                 PrettyName = "Status",
-                Position = {75 , 170 },
+                Position = { 75 , 190 },
                 Size = { 150 , 60 },
                 Margin = 0,
                 Radius = 0,
@@ -202,7 +224,7 @@ function GetControlLayout(props)
             layout["X Position"] =
             {
                 PrettyName = "X Position",
-                Position = { 235 , 170 },
+                Position = { 235 , 190 },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -216,7 +238,7 @@ function GetControlLayout(props)
             layout["Y Position"] =
             {
                 PrettyName = "Y Position",
-                Position = { 235 , 190 },
+                Position = { 235 , 210 },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -230,7 +252,7 @@ function GetControlLayout(props)
             layout["Name"] =
             {
                 PrettyName = "Name",
-                Position = { 235 , 210 },
+                Position = { 235 , 230 },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -246,7 +268,7 @@ function GetControlLayout(props)
                 layout["Status " .. i] =
                 {
                     PrettyName = "Status " .. i,
-                    Position = {75 , 100 + (i * 70) },
+                    Position = {75 , 120 + (i * 70) },
                     Size = { 150 , 60 },
                     Margin = 0,
                     Radius = 0,
@@ -259,7 +281,7 @@ function GetControlLayout(props)
                 layout["X Position " .. i] =
                 {
                     PrettyName = "X Position " .. i,
-                    Position = { 235 , 100 + (i * 70) },
+                    Position = { 235 , 120 + (i * 70) },
                     Size = { 75 , 16 },
                     Color = { 255, 255, 255 },
                     Margin = 0,
@@ -273,7 +295,7 @@ function GetControlLayout(props)
                 layout["Y Position " .. i] =
                 {
                     PrettyName = "Y Position " .. i,
-                    Position = { 235 , 120 + (i * 70) },
+                    Position = { 235 , 140 + (i * 70) },
                     Size = { 75 , 16 },
                     Color = { 255, 255, 255 },
                     Margin = 0,
@@ -287,7 +309,7 @@ function GetControlLayout(props)
                 layout["Name " .. i] =
                 {
                     PrettyName = "Name " .. i,
-                    Position = { 235 , 140 + (i * 70) },
+                    Position = { 235 , 160 + (i * 70) },
                     Size = { 75 , 16 },
                     Color = { 255, 255, 255 },
                     Margin = 0,
@@ -356,54 +378,57 @@ end
 function insertBeforeClosingTag(xmlString, tag, stringToInsert)
     local start = 0
     local stop = 0
-    
+
     start, stop = string.find(xmlString, "</[^>]*" .. tag .. "[^>]*>")
     if(start == nil) then return xmlString .. stringToInsert end
-    
+
     if(start == 1) then
-      return xmlString .. stringToInsert
+        return xmlString .. stringToInsert
     end
-    
+
     return string.sub(xmlString, 1, start - 1) .. stringToInsert .. string.sub(xmlString, start, xmlString:len())
-  end
+end
   
-  function removeTag(xmlString, tag)
+function removeTag(xmlString, tag)
     local start = 0
     local stop = 0
     local returnedString = ""
-    
+
     start, stop = string.find(xmlString, "<[^>]*" .. tag .. "[^>]*>")
     if(start == nil) then return xmlString end
     --print("Start: " .. start .. " - Stop: " .. stop .. " - " .. string.sub(xmlString, start, stop))
-    
+
     if(start ~= 1) then
-      returnedString = returnedString .. string.sub(xmlString, 1, start - 1)
+        returnedString = returnedString .. string.sub(xmlString, 1, start - 1)
     end  
-    
+
     if(stop ~= xmlString:len()) then
-      returnedString = returnedString .. string.sub(xmlString, stop + 1, xmlString:len())
+        returnedString = returnedString .. string.sub(xmlString, stop + 1, xmlString:len())
     end
-    
+
     return returnedString
-  end
+end
   
-  function UpdateMap()
+function UpdateMap()
     local doc = EzSVG.Document(300, 300)
-    
+
+    if(tonumber(Controls["Interface Scale"].String) == nil) then Controls["Interface Scale"].String = "1.0" end
+    local interfaceScale = tonumber(Controls["Interface Scale"].String)
+
     if(INPUT_COUNT == 1) then
-      if(tonumber(Controls["X Position"].String) == nil) then Controls["X Position"].String = "0" end
-      if(tonumber(Controls["Y Position"].String) == nil) then Controls["Y Position"].String = "0" end
-      doc:add(EzSVG.Text(Controls["Name"].String, Controls["X Position"].String, Controls["Y Position"].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", stroke = "white", stroke_width = "0.5em", stroke_linejoin = "round"}))
-      doc:add(EzSVG.Text(Controls["Name"].String, Controls["X Position"].String, Controls["Y Position"].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", fill = "black"}))
-      doc:add(EzSVG.Circle(Controls["X Position"].String, Controls["Y Position"].String, 15):setStyle({fill=COLORS[Controls["Status"].Value]}))
+        if(tonumber(Controls["X Position"].String) == nil) then Controls["X Position"].String = "0" end
+        if(tonumber(Controls["Y Position"].String) == nil) then Controls["Y Position"].String = "0" end
+        doc:add(EzSVG.Text(Controls["Name"].String, Controls["X Position"].String, Controls["Y Position"].String - interfaceScale):setStyle({font_size = math.floor(interfaceScale), font_style = "Arial", text_anchor = "middle", stroke = "white", stroke_width = "0.5em", stroke_linejoin = "round"}))
+        doc:add(EzSVG.Text(Controls["Name"].String, Controls["X Position"].String, Controls["Y Position"].String - interfaceScale):setStyle({font_size = math.floor(interfaceScale), font_style = "Arial", text_anchor = "middle", fill = "black"}))
+        doc:add(EzSVG.Circle(Controls["X Position"].String, Controls["Y Position"].String, interfaceScale * 0.7):setStyle({fill=COLORS[Controls["Status"].Value]}))
     else
-      for idx = 1, INPUT_COUNT do
-        if(tonumber(Controls["X Position"][idx].String) == nil) then Controls["X Position"][idx].String = "0" end
-        if(tonumber(Controls["Y Position"][idx].String) == nil) then Controls["Y Position"][idx].String = "0" end
-        doc:add(EzSVG.Text(Controls["Name"][idx].String, Controls["X Position"][idx].String, Controls["Y Position"][idx].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", stroke = "white", stroke_width = "0.5em", stroke_linejoin = "round"}))
-        doc:add(EzSVG.Text(Controls["Name"][idx].String, Controls["X Position"][idx].String, Controls["Y Position"][idx].String - 25):setStyle({font_size = 24, font_style = "Arial", text_anchor = "middle", fill = "black"}))
-        doc:add(EzSVG.Circle(Controls["X Position"][idx].String, Controls["Y Position"][idx].String, 15):setStyle({fill=COLORS[Controls["Status"][idx].Value]}))
-      end
+        for idx = 1, INPUT_COUNT do
+            if(tonumber(Controls["X Position"][idx].String) == nil) then Controls["X Position"][idx].String = "0" end
+            if(tonumber(Controls["Y Position"][idx].String) == nil) then Controls["Y Position"][idx].String = "0" end
+            doc:add(EzSVG.Text(Controls["Name"][idx].String, Controls["X Position"][idx].String, Controls["Y Position"][idx].String - interfaceScale):setStyle({font_size = math.floor(interfaceScale), font_style = "Arial", text_anchor = "middle", stroke = "white", stroke_width = "0.5em", stroke_linejoin = "round"}))
+            doc:add(EzSVG.Text(Controls["Name"][idx].String, Controls["X Position"][idx].String, Controls["Y Position"][idx].String - interfaceScale):setStyle({font_size = math.floor(interfaceScale), font_style = "Arial", text_anchor = "middle", fill = "black"}))
+            doc:add(EzSVG.Circle(Controls["X Position"][idx].String, Controls["Y Position"][idx].String, interfaceScale * 0.7):setStyle({fill=COLORS[Controls["Status"][idx].Value]}))
+        end
     end
     
     foreground = doc:toString()
@@ -419,7 +444,7 @@ function insertBeforeClosingTag(xmlString, tag, stringToInsert)
         DrawChrome = false, -- (Don't) Draw the button face and edges
         IconData = Crypto.Base64Encode(svg),
       })
-  end
+end
 
 ------------------------------- Runtime Logic ---------------------------------
 
