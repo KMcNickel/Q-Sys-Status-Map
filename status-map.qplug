@@ -2,7 +2,7 @@ PluginInfo = {
 	-- Use a tilde (~) to seperate the name into a folder
     Name = "Status Map",
 	-- Use semantic versioning
-    Version = "0.3.0",
+    Version = "0.4.1",
 	-- Use a GUID for the Id (Note: Avoid changing the Id for a plugin as the Id is used as the unique identifier)
     Id = "5e5d7ed9-713f-4473-a1ec-37d0f2f73515",
 	-- The square brackets allow for a multi-line string
@@ -50,13 +50,6 @@ function GetProperties()
 			Min = 1,
 			Max = 32,
 			Value = 1
-		},
-		{
-			Name = "Refresh Rate (Hz)",
-			Type = "integer",
-			Min = 1,
-			Max = 30,
-			Value = 30
 		}
     }
 
@@ -606,17 +599,29 @@ if Controls then
 rapidjson = require("rapidjson")
 EzSVG = require "EzSVG"
 ------------------------------------ Objects ----------------------------------
-REFRESH_INTERVAL = 1.0 / Properties["Refresh Rate (Hz)"].Value
 INPUT_COUNT = Properties["Input Quantity"].Value
 
 
 -------------------------------- Initialization -------------------------------
 function Initialize()
 	-- Do initialization stuff here
-    RefreshTimer = Timer.New()
-    RefreshTimer.EventHandler = UpdateMap
-    print("Starting plugin with refresh interval of: " .. REFRESH_INTERVAL)
-    RefreshTimer:Start(REFRESH_INTERVAL)
+    Controls["Background Map"].EventHandler = UpdateMap
+    Controls["Interface Scale"].EventHandler = UpdateMap
+    if (INPUT_COUNT == 1) then
+        Controls["X Position"].EventHandler = UpdateMap
+        Controls["Y Position"].EventHandler = UpdateMap
+        Controls["Name"].EventHandler = UpdateMap
+        Controls["Status"].EventHandler = UpdateMap
+    else
+        for idx = 1, INPUT_COUNT do
+            Controls["X Position"][idx].EventHandler = UpdateMap
+            Controls["Y Position"][idx].EventHandler = UpdateMap
+            Controls["Name"][idx].EventHandler = UpdateMap
+            Controls["Status"][idx].EventHandler = UpdateMap
+        end
+    end
+
+    UpdateMap()
 end
 
 canInitialize = true
