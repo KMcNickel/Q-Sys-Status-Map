@@ -43,7 +43,7 @@ STATUS_VALUES = {
 
 --------------------------------- Properties ----------------------------------
 function GetProperties()
-    props = {
+    local props = {
 		{
 			Name = "Input Quantity",
 			Type = "integer",
@@ -535,7 +535,7 @@ function ConvertColor(c)
 	return t
 end
 
-function insertBeforeClosingTag(xmlString, tag, stringToInsert)
+function InsertBeforeClosingTag(xmlString, tag, stringToInsert)
     local start = 0
     local stop = 0
 
@@ -549,7 +549,7 @@ function insertBeforeClosingTag(xmlString, tag, stringToInsert)
     return string.sub(xmlString, 1, start - 1) .. stringToInsert .. string.sub(xmlString, start, xmlString:len())
 end
   
-function removeTag(xmlString, tag)
+function RemoveTag(xmlString, tag)
     local start = 0
     local stop = 0
     local returnedString = ""
@@ -591,16 +591,16 @@ function UpdateMap()
         end
     end
     
-    foreground = doc:toString()
-    foreground = removeTag(foreground, "xml")
-    foreground = removeTag(foreground, "svg")
-    foreground = removeTag(foreground, "/svg")
+    local foreground = doc:toString()
+    foreground = RemoveTag(foreground, "xml")
+    foreground = RemoveTag(foreground, "svg")
+    foreground = RemoveTag(foreground, "/svg")
   
-    background = Controls["Background Map"].String
+    local background = Controls["Background Map"].String
     
-    svg = insertBeforeClosingTag(background, "svg", foreground)
+    local svg = InsertBeforeClosingTag(background, "svg", foreground)
   
-    Controls["Rendered Map"].Legend = rapidjson.encode({
+    Controls["Rendered Map"].Legend = Rapidjson.encode({
         DrawChrome = false, -- (Don't) Draw the button face and edges
         IconData = Crypto.Base64Encode(svg),
       })
@@ -610,7 +610,7 @@ end
 
 if Controls then
     
-rapidjson = require("rapidjson")
+Rapidjson = require("rapidjson")
 EzSVG = require "EzSVG"
 ------------------------------------ Objects ----------------------------------
 INPUT_COUNT = Properties["Input Quantity"].Value
@@ -638,11 +638,11 @@ function Initialize()
     UpdateMap()
 end
 
-canInitialize = true
+CanInitialize = true
 
 -- Check Properties and other stuff for illegal values
 
-if canInitialize then
+if CanInitialize then
 	print("Initializing")
 	Initialize()
 	print("Initialization Complete")
