@@ -2,7 +2,7 @@ PluginInfo = {
 	-- Use a tilde (~) to seperate the name into a folder
     Name = "Status Map",
 	-- Use semantic versioning
-    Version = "0.4.1",
+    Version = "0.4.2",
 	-- Use a GUID for the Id (Note: Avoid changing the Id for a plugin as the Id is used as the unique identifier)
     Id = "5e5d7ed9-713f-4473-a1ec-37d0f2f73515",
 	-- The square brackets allow for a multi-line string
@@ -141,58 +141,96 @@ function GetControls(props)
 end
 
 ------------------------------- Control Layout --------------------------------
-function GetControlLayout(props)
+function GetMapPageControlLayout(props)
+    local layout = {}
+    layout["Rendered Map"] =
+    {
+        PrettyName = "Rendered Map",
+        Position = { 10, 20 },
+        Size = { 300 , 300 },
+        Color = { 255, 255, 255 },
+        Margin = 0,
+        Radius = 0,
+        Style = "Button",
+        TextFontSize = 10,
+        WordWrap = true,
+        IsBold = false,
+        IsReadOnly = true
+    }
+
+    local graphics = {}
+    table.insert(graphics, {
+        Type = "GroupBox",
+        Position = {0, 0},
+        Size = {320, 330},
+        Text = "Rendered Map",
+        TextSize = 12,
+        HTextAlign = "Left",
+        IsBold = false,
+        StrokeWidth = 1,
+        CornerRadius = 8
+    })
+
+    return layout, graphics
+end
+
+function GetConfigPageControlLayout(props)
     BACKGROUND_MAP_Y_POSITION = 0
     INTERFACE_SCALE_Y_POSITION = 185
     INPUT_DATA_Y_POSITION = 210
 
-    local currentPage = props["page_index"].Value
     local inputCount = props["Input Quantity"].Value
-    layout = { }
 
-    --[[layout["code"] = 
+    local layout = {}
+
+    layout["Background Map"] =
     {
-        PrettyName = "Code",
-        Style = "None"
-    }]]
+        PrettyName = "Background Map",
+        Position = { 10 , BACKGROUND_MAP_Y_POSITION + 20 },
+        Size = { 300 , 150 },
+        Color = { 255, 255, 255 },
+        Margin = 0,
+        Radius = 0,
+        Style = "Text",
+        TextFontSize = 10,
+        WordWrap = true,
+        IsBold = false,
+        IsReadOnly = false
+    }
 
-    if (currentPage == 1) then
-        layout["Rendered Map"] =
+    layout["Interface Scale"] =
+    {
+        PrettyName = "Interface Scale",
+        Position = { 85 , INTERFACE_SCALE_Y_POSITION },
+        Size = { 75 , 16 },
+        Color = { 255, 255, 255 },
+        Margin = 0,
+        Radius = 0,
+        Style = "Text",
+        TextFontSize = 10,
+        WordWrap = true,
+        IsBold = false,
+        IsReadOnly = false
+    }
+
+    if (inputCount == 1) then
+        layout["Status"] =
         {
-            PrettyName = "Rendered Map",
-            Position = { 10, 20 },
-            Size = { 300 , 300 },
-            Color = { 255, 255, 255 },
-            Margin = 0,
-            Radius = 0,
-            Style = "Button",
-            TextFontSize = 10,
-            WordWrap = true,
-            IsBold = false,
-            IsReadOnly = true
-        }
-
-    elseif (currentPage == 2) then
-
-        layout["Background Map"] =
-        {
-            PrettyName = "Background Map",
-            Position = { 10 , BACKGROUND_MAP_Y_POSITION + 20 },
-            Size = { 300 , 150 },
-            Color = { 255, 255, 255 },
+            PrettyName = "Status",
+            Position = { 10 , INPUT_DATA_Y_POSITION + 20 },
+            Size = { 150 , 40 },
             Margin = 0,
             Radius = 0,
             Style = "Text",
             TextFontSize = 10,
             WordWrap = true,
             IsBold = false,
-            IsReadOnly = false
+            IsReadOnly = true
         }
-
-        layout["Interface Scale"] =
+        layout["X Position"] =
         {
-            PrettyName = "Interface Scale",
-            Position = { 85 , INTERFACE_SCALE_Y_POSITION },
+            PrettyName = "X Position",
+            Position = { 235 , INPUT_DATA_Y_POSITION + 5 },
             Size = { 75 , 16 },
             Color = { 255, 255, 255 },
             Margin = 0,
@@ -203,12 +241,40 @@ function GetControlLayout(props)
             IsBold = false,
             IsReadOnly = false
         }
-
-        if (inputCount == 1) then
-            layout["Status"] =
+        layout["Y Position"] =
+        {
+            PrettyName = "Y Position",
+            Position = { 235 , INPUT_DATA_Y_POSITION + 25 },
+            Size = { 75 , 16 },
+            Color = { 255, 255, 255 },
+            Margin = 0,
+            Radius = 0,
+            Style = "Text",
+            TextFontSize = 10,
+            WordWrap = true,
+            IsBold = false,
+            IsReadOnly = false
+        }
+        layout["Name"] =
+        {
+            PrettyName = "Name",
+            Position = { 235 , INPUT_DATA_Y_POSITION + 45 },
+            Size = { 75 , 16 },
+            Color = { 255, 255, 255 },
+            Margin = 0,
+            Radius = 0,
+            Style = "Text",
+            TextFontSize = 10,
+            WordWrap = true,
+            IsBold = false,
+            IsReadOnly = false
+        }
+    else
+        for i = 0, inputCount do
+            layout["Status " .. i] =
             {
-                PrettyName = "Status",
-                Position = { 10 , INPUT_DATA_Y_POSITION + 20 },
+                PrettyName = "Status " .. i,
+                Position = {10 , INPUT_DATA_Y_POSITION + 20 + ((i - 1) * 70) },
                 Size = { 150 , 40 },
                 Margin = 0,
                 Radius = 0,
@@ -218,10 +284,10 @@ function GetControlLayout(props)
                 IsBold = false,
                 IsReadOnly = true
             }
-            layout["X Position"] =
+            layout["X Position " .. i] =
             {
-                PrettyName = "X Position",
-                Position = { 235 , INPUT_DATA_Y_POSITION + 5 },
+                PrettyName = "X Position " .. i,
+                Position = { 235 , INPUT_DATA_Y_POSITION + 5 + ((i - 1) * 70) },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -232,10 +298,10 @@ function GetControlLayout(props)
                 IsBold = false,
                 IsReadOnly = false
             }
-            layout["Y Position"] =
+            layout["Y Position " .. i] =
             {
-                PrettyName = "Y Position",
-                Position = { 235 , INPUT_DATA_Y_POSITION + 25 },
+                PrettyName = "Y Position " .. i,
+                Position = { 235 , INPUT_DATA_Y_POSITION + 25 + ((i - 1) * 70) },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -246,10 +312,10 @@ function GetControlLayout(props)
                 IsBold = false,
                 IsReadOnly = false
             }
-            layout["Name"] =
+            layout["Name " .. i] =
             {
-                PrettyName = "Name",
-                Position = { 235 , INPUT_DATA_Y_POSITION + 45 },
+                PrettyName = "Name " .. i,
+                Position = { 235 , INPUT_DATA_Y_POSITION + 45 + ((i - 1) * 70) },
                 Size = { 75 , 16 },
                 Color = { 255, 255, 255 },
                 Margin = 0,
@@ -260,123 +326,100 @@ function GetControlLayout(props)
                 IsBold = false,
                 IsReadOnly = false
             }
-        else
-            for i = 0, inputCount do
-                layout["Status " .. i] =
-                {
-                    PrettyName = "Status " .. i,
-                    Position = {10 , INPUT_DATA_Y_POSITION + 20 + ((i - 1) * 70) },
-                    Size = { 150 , 40 },
-                    Margin = 0,
-                    Radius = 0,
-                    Style = "Text",
-                    TextFontSize = 10,
-                    WordWrap = true,
-                    IsBold = false,
-                    IsReadOnly = true
-                }
-                layout["X Position " .. i] =
-                {
-                    PrettyName = "X Position " .. i,
-                    Position = { 235 , INPUT_DATA_Y_POSITION + 5 + ((i - 1) * 70) },
-                    Size = { 75 , 16 },
-                    Color = { 255, 255, 255 },
-                    Margin = 0,
-                    Radius = 0,
-                    Style = "Text",
-                    TextFontSize = 10,
-                    WordWrap = true,
-                    IsBold = false,
-                    IsReadOnly = false
-                }
-                layout["Y Position " .. i] =
-                {
-                    PrettyName = "Y Position " .. i,
-                    Position = { 235 , INPUT_DATA_Y_POSITION + 25 + ((i - 1) * 70) },
-                    Size = { 75 , 16 },
-                    Color = { 255, 255, 255 },
-                    Margin = 0,
-                    Radius = 0,
-                    Style = "Text",
-                    TextFontSize = 10,
-                    WordWrap = true,
-                    IsBold = false,
-                    IsReadOnly = false
-                }
-                layout["Name " .. i] =
-                {
-                    PrettyName = "Name " .. i,
-                    Position = { 235 , INPUT_DATA_Y_POSITION + 45 + ((i - 1) * 70) },
-                    Size = { 75 , 16 },
-                    Color = { 255, 255, 255 },
-                    Margin = 0,
-                    Radius = 0,
-                    Style = "Text",
-                    TextFontSize = 10,
-                    WordWrap = true,
-                    IsBold = false,
-                    IsReadOnly = false
-                }
-            end
         end
     end
 
-    graphics = { }
-
-    if (currentPage == 1) then
+    local graphics = {}
+    table.insert(graphics, {
+        Type = "GroupBox",
+        Position = {0, BACKGROUND_MAP_Y_POSITION},
+        Size = {320, 180},
+        Text = "Background Map",
+        TextSize = 12,
+        HTextAlign = "Left",
+        IsBold = false,
+        StrokeWidth = 1,
+        CornerRadius = 8
+    })
+    table.insert(graphics, {
+        Type = "Label",
+        Position = {0, INTERFACE_SCALE_Y_POSITION},
+        Size = {80, 16},
+        Text = "Interface Scale",
+        TextSize = 12,
+        HTextAlign = "Right",
+        VTextAlign = "Center",
+        IsBold = false,
+        StrokeWidth = 0,
+        CornerRadius = 0
+    })
+    table.insert(graphics, {
+        Type = "Label",
+        Position = {165, INTERFACE_SCALE_Y_POSITION},
+        Size = {155, 16},
+        Text = "Author: Kyle McNicoll - Version: " .. PluginInfo.Version,
+        TextSize = 10,
+        HTextAlign = "Left",
+        VTextAlign = "Center",
+        IsBold = false,
+        StrokeWidth = 0,
+        CornerRadius = 0
+    })
+    if (inputCount == 1) then
         table.insert(graphics, {
             Type = "GroupBox",
-			Position = {0, 0},
-			Size = {320, 330},
-			Text = "Rendered Map",
-			TextSize = 12,
-			HTextAlign = "Left",
-			IsBold = false,
-			StrokeWidth = 1,
-			CornerRadius = 8
-        })
-    elseif (currentPage == 2) then
-        table.insert(graphics, {
-            Type = "GroupBox",
-			Position = {0, BACKGROUND_MAP_Y_POSITION},
-			Size = {320, 180},
-			Text = "Background Map",
-			TextSize = 12,
-			HTextAlign = "Left",
-			IsBold = false,
-			StrokeWidth = 1,
-			CornerRadius = 8
+            Position = {0, INPUT_DATA_Y_POSITION},
+            Size = {320, 65},
+            Text = "Input 1",
+            TextSize = 12,
+            HTextAlign = "Left",
+            IsBold = false,
+            StrokeWidth = 1,
+            CornerRadius = 8
         })
         table.insert(graphics, {
             Type = "Label",
-			Position = {0, INTERFACE_SCALE_Y_POSITION},
-			Size = {80, 16},
-			Text = "Interface Scale",
-			TextSize = 12,
-			HTextAlign = "Right",
-			VTextAlign = "Center",
-			IsBold = false,
-			StrokeWidth = 0,
-			CornerRadius = 0
+            Position = {165, INPUT_DATA_Y_POSITION + 5},
+            Size = {70, 16},
+            Text = "X Position",
+            TextSize = 12,
+            HTextAlign = "Right",
+            VTextAlign = "Center",
+            IsBold = false,
+            StrokeWidth = 0,
+            CornerRadius = 0
         })
         table.insert(graphics, {
-			Type = "Label",
-			Position = {165, INTERFACE_SCALE_Y_POSITION},
-			Size = {155, 16},
-			Text = "Author: Kyle McNicoll - Version: " .. PluginInfo.Version,
-			TextSize = 10,
-			HTextAlign = "Left",
-			VTextAlign = "Center",
-			IsBold = false,
-			StrokeWidth = 0,
-			CornerRadius = 0
+            Type = "Label",
+            Position = {165, INPUT_DATA_Y_POSITION + 25},
+            Size = {70, 16},
+            Text = "Y Position",
+            TextSize = 12,
+            HTextAlign = "Right",
+            VTextAlign = "Center",
+            IsBold = false,
+            StrokeWidth = 0,
+            CornerRadius = 0
         })
-        if (inputCount == 1) then
+        table.insert(graphics, {
+            Type = "Label",
+            Position = {165, INPUT_DATA_Y_POSITION + 45},
+            Size = {70, 16},
+            Text = "Name",
+            TextSize = 12,
+            HTextAlign = "Right",
+            VTextAlign = "Center",
+            IsBold = false,
+            StrokeWidth = 0,
+            CornerRadius = 0
+        })
+    else
+        for i = 1, inputCount do
             table.insert(graphics, {
                 Type = "GroupBox",
-                Position = {0, INPUT_DATA_Y_POSITION},
+                Position = {0, INPUT_DATA_Y_POSITION + ((i - 1) * 70)},
                 Size = {320, 65},
-                Text = "Input 1",
+                Text = "Input " .. i,
                 TextSize = 12,
                 HTextAlign = "Left",
                 IsBold = false,
@@ -385,7 +428,7 @@ function GetControlLayout(props)
             })
             table.insert(graphics, {
                 Type = "Label",
-                Position = {165, INPUT_DATA_Y_POSITION + 5},
+                Position = {165, INPUT_DATA_Y_POSITION + 5 + ((i - 1) * 70)},
                 Size = {70, 16},
                 Text = "X Position",
                 TextSize = 12,
@@ -397,7 +440,7 @@ function GetControlLayout(props)
             })
             table.insert(graphics, {
                 Type = "Label",
-                Position = {165, INPUT_DATA_Y_POSITION + 25},
+                Position = {165, INPUT_DATA_Y_POSITION + 25 + ((i - 1) * 70)},
                 Size = {70, 16},
                 Text = "Y Position",
                 TextSize = 12,
@@ -409,7 +452,7 @@ function GetControlLayout(props)
             })
             table.insert(graphics, {
                 Type = "Label",
-                Position = {165, INPUT_DATA_Y_POSITION + 45},
+                Position = {165, INPUT_DATA_Y_POSITION + 45 + ((i - 1) * 70)},
                 Size = {70, 16},
                 Text = "Name",
                 TextSize = 12,
@@ -419,60 +462,26 @@ function GetControlLayout(props)
                 StrokeWidth = 0,
                 CornerRadius = 0
             })
-        else
-            for i = 1, inputCount do
-                table.insert(graphics, {
-                    Type = "GroupBox",
-                    Position = {0, INPUT_DATA_Y_POSITION + ((i - 1) * 70)},
-                    Size = {320, 65},
-                    Text = "Input " .. i,
-                    TextSize = 12,
-                    HTextAlign = "Left",
-                    IsBold = false,
-                    StrokeWidth = 1,
-                    CornerRadius = 8
-                })
-                table.insert(graphics, {
-                    Type = "Label",
-                    Position = {165, INPUT_DATA_Y_POSITION + 5 + ((i - 1) * 70)},
-                    Size = {70, 16},
-                    Text = "X Position",
-                    TextSize = 12,
-                    HTextAlign = "Right",
-                    VTextAlign = "Center",
-                    IsBold = false,
-                    StrokeWidth = 0,
-                    CornerRadius = 0
-                })
-                table.insert(graphics, {
-                    Type = "Label",
-                    Position = {165, INPUT_DATA_Y_POSITION + 25 + ((i - 1) * 70)},
-                    Size = {70, 16},
-                    Text = "Y Position",
-                    TextSize = 12,
-                    HTextAlign = "Right",
-                    VTextAlign = "Center",
-                    IsBold = false,
-                    StrokeWidth = 0,
-                    CornerRadius = 0
-                })
-                table.insert(graphics, {
-                    Type = "Label",
-                    Position = {165, INPUT_DATA_Y_POSITION + 45 + ((i - 1) * 70)},
-                    Size = {70, 16},
-                    Text = "Name",
-                    TextSize = 12,
-                    HTextAlign = "Right",
-                    VTextAlign = "Center",
-                    IsBold = false,
-                    StrokeWidth = 0,
-                    CornerRadius = 0
-                })
-            end
         end
     end
 
     return layout, graphics
+end
+
+function GetControlLayout(props)
+    local currentPage = props["page_index"].Value
+
+    --[[layout["code"] = 
+    {
+        PrettyName = "Code",
+        Style = "None"
+    }]]
+    
+    if PluginPages[currentPage] == "Map" then
+        return GetMapPageControlLayout(props)
+    elseif PluginPages[currentPage] == "Config" then
+        return GetConfigPageControlLayout(props)
+    end
 end
 
 ---------------------------- Other Plugin Functions ---------------------------
@@ -483,11 +492,16 @@ function GetPins(props)
 	return pins
 end
 
+PluginPages = {
+    "Map",
+    "Config"
+}
+
 function GetPages(props)
-    local pages = {
-        {name = "Map"},
-        {name = "Config"},
-    }
+    local pages = {}
+    for _, page in ipairs(PluginPages) do
+        table.insert(pages, {name = page})
+    end
 
     return pages
 end
